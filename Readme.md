@@ -4,7 +4,7 @@
 > They want their VAT back.  
 > This is that system.
 
-![CI](https://github.com/YOUR_USERNAME/tax-refund-api/actions/workflows/ci.yml/badge.svg)
+![CI](https://github.com/Demontrick/tax-refund-api/actions/workflows/ci.yml/badge.svg)
 
 ---
 
