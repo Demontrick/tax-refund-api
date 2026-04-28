@@ -1,96 +1,61 @@
-package com.globalblue.taxrefund.controller;
+package com.globalblue.taxrefund.dto;
 
-import com.globalblue.taxrefund.dto.RefundClaimResponse;
-import com.globalblue.taxrefund.dto.RefundRequest;
-import com.globalblue.taxrefund.models.AuditLog;
-import com.globalblue.taxrefund.models.RefundClaim;
-import com.globalblue.taxrefund.repository.AuditLogRepository;
-import com.globalblue.taxrefund.repository.RefundClaimRepository;
-import com.globalblue.taxrefund.service.RefundService;
-import org.springframework.web.bind.annotation.*;
+import com.globalblue.taxrefund.models.ClaimStatus;
 
-import java.util.List;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
-@RestController
-@RequestMapping("/api/refunds")
-public class RefundController {
+public class RefundClaimResponse {
 
-    private final RefundService refundService;
-    private final RefundClaimRepository refundClaimRepository;
-    private final AuditLogRepository auditLogRepository;
+    private Long id;
+    private String claimReference;
+    private String touristName;
+    private BigDecimal purchaseAmount;
+    private String purchaseCurrency;
+    private BigDecimal vatRate;
+    private BigDecimal refundAmount;
+    private String countryOfPurchase;
+    private ClaimStatus status;
+    private String rejectionReason;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 
-    public RefundController(RefundService refundService,
-                            RefundClaimRepository refundClaimRepository,
-                            AuditLogRepository auditLogRepository) {
-        this.refundService = refundService;
-        this.refundClaimRepository = refundClaimRepository;
-        this.auditLogRepository = auditLogRepository;
+    public RefundClaimResponse() {
     }
 
-    // CREATE CLAIM
-    @PostMapping
-    public RefundClaimResponse create(@RequestBody RefundRequest request) {
-        RefundClaim claim = refundService.createClaim(request);
-        return mapToResponse(claim);
-    }
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
-    // GET BY ID
-    @GetMapping("/{id}")
-    public RefundClaimResponse getById(@PathVariable Long id) {
-        RefundClaim claim = refundClaimRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Claim not found: " + id));
-        return mapToResponse(claim);
-    }
+    public String getClaimReference() { return claimReference; }
+    public void setClaimReference(String claimReference) { this.claimReference = claimReference; }
 
-    // GET ALL
-    @GetMapping
-    public List<RefundClaimResponse> getAll() {
-        return refundClaimRepository.findAll()
-                .stream()
-                .map(this::mapToResponse)
-                .toList();
-    }
+    public String getTouristName() { return touristName; }
+    public void setTouristName(String touristName) { this.touristName = touristName; }
 
-    // VALIDATE
-    @PostMapping("/{id}/validate")
-    public RefundClaimResponse validate(@PathVariable Long id) {
-        return mapToResponse(refundService.validate(id));
-    }
+    public BigDecimal getPurchaseAmount() { return purchaseAmount; }
+    public void setPurchaseAmount(BigDecimal purchaseAmount) { this.purchaseAmount = purchaseAmount; }
 
-    // APPROVE
-    @PostMapping("/{id}/approve")
-    public RefundClaimResponse approve(@PathVariable Long id) {
-        return mapToResponse(refundService.approve(id));
-    }
+    public String getPurchaseCurrency() { return purchaseCurrency; }
+    public void setPurchaseCurrency(String purchaseCurrency) { this.purchaseCurrency = purchaseCurrency; }
 
-    // REJECT
-    @PostMapping("/{id}/reject")
-    public RefundClaimResponse reject(@PathVariable Long id,
-                                      @RequestParam String reason) {
-        return mapToResponse(refundService.reject(id, reason));
-    }
+    public BigDecimal getVatRate() { return vatRate; }
+    public void setVatRate(BigDecimal vatRate) { this.vatRate = vatRate; }
 
-    // AUDIT
-    @GetMapping("/{id}/audit")
-    public List<AuditLog> audit(@PathVariable Long id) {
-        return auditLogRepository.findByClaimId(id);
-    }
+    public BigDecimal getRefundAmount() { return refundAmount; }
+    public void setRefundAmount(BigDecimal refundAmount) { this.refundAmount = refundAmount; }
 
-    // MAPPER (simple manual mapping for POC)
-    private RefundClaimResponse mapToResponse(RefundClaim claim) {
-        RefundClaimResponse res = new RefundClaimResponse();
-        res.setId(claim.getId());
-        res.setClaimReference(claim.getClaimReference());
-        res.setTouristName(claim.getTouristName());
-        res.setPurchaseAmount(claim.getPurchaseAmount());
-        res.setPurchaseCurrency(claim.getPurchaseCurrency());
-        res.setVatRate(claim.getVatRate());
-        res.setRefundAmount(claim.getRefundAmount());
-        res.setCountryOfPurchase(claim.getCountryOfPurchase());
-        res.setStatus(claim.getStatus());
-        res.setRejectionReason(claim.getRejectionReason());
-        res.setCreatedAt(claim.getCreatedAt());
-        res.setUpdatedAt(claim.getUpdatedAt());
-        return res;
-    }
+    public String getCountryOfPurchase() { return countryOfPurchase; }
+    public void setCountryOfPurchase(String countryOfPurchase) { this.countryOfPurchase = countryOfPurchase; }
+
+    public ClaimStatus getStatus() { return status; }
+    public void setStatus(ClaimStatus status) { this.status = status; }
+
+    public String getRejectionReason() { return rejectionReason; }
+    public void setRejectionReason(String rejectionReason) { this.rejectionReason = rejectionReason; }
+
+    public LocalDateTime getCreatedAt() { return createdAt; }
+    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+
+    public LocalDateTime getUpdatedAt() { return updatedAt; }
+    public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
 }
