@@ -243,4 +243,6 @@ Exactly the kind of engineering challenge companies like Global Blue solve daily
 
 Author
 
-Built as a backend engineering submission for Global Blue.
+Built to demonstrate production-grade financial 
+workflow engineering — correctness, auditability, 
+and clean architecture at the service layer.
