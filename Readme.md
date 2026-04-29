@@ -1,4 +1,4 @@
-# Tax Refund API
+markdown# Tax Refund API
 
 > A tourist buys a Gucci bag in Paris.  
 > They want their VAT back.  
@@ -59,3 +59,117 @@ Invalid claims throw immediately — no silent failures.
 ---
 
 ## Refund Formula
+refundAmount = purchaseAmount × vatRate / (1 + vatRate) × 0.85
+
+Global Blue retains 15% processing fee.
+
+Example: €1,000 purchase in France → **€141.67 refund**
+
+---
+
+## Status Machine
+SUBMITTED → VALIDATED → APPROVED → PAID
+↘ REJECTED
+
+| Transition | Allowed |
+|-----------|---------|
+| SUBMITTED → VALIDATED | ✓ |
+| VALIDATED → APPROVED | ✓ |
+| VALIDATED → REJECTED | ✓ |
+| APPROVED → PAID | ✓ |
+| Any invalid transition | ✗ throws IllegalStateException |
+
+Every transition creates an AuditLog entry automatically.
+
+---
+
+## Endpoints
+
+| Method | Endpoint | Description | Role |
+|--------|----------|-------------|------|
+| POST | /api/auth/token | Generate JWT | Public |
+| POST | /api/refunds | Submit claim | Authenticated |
+| GET | /api/refunds/{id} | Get claim | Authenticated |
+| GET | /api/refunds | List all claims | AGENT / ADMIN |
+| POST | /api/refunds/{id}/validate | Validate | AGENT / ADMIN |
+| POST | /api/refunds/{id}/approve | Approve + auto-pay | AGENT / ADMIN |
+| POST | /api/refunds/{id}/reject | Reject with reason | AGENT / ADMIN |
+| GET | /api/refunds/{id}/audit | Audit trail | ADMIN |
+
+---
+
+## JWT Roles
+
+- **TOURIST** — submit and view own claims
+- **AGENT** — validate, approve, reject claims
+- **ADMIN** — full access including audit logs
+
+Generate a test token:
+
+```bash
+POST /api/auth/token
+{
+  "username": "admin",
+  "role": "ADMIN"
+}
+```
+
+---
+
+## Example Request
+
+```bash
+POST /api/refunds
+{
+  "touristName": "John Smith",
+  "purchaseAmount": 1000,
+  "purchaseCurrency": "EUR",
+  "countryOfPurchase": "FR"
+}
+```
+
+Response:
+```json
+{
+  "id": 1,
+  "claimReference": "GBL-A1B2C3D4",
+  "refundAmount": 141.67,
+  "status": "SUBMITTED"
+}
+```
+
+---
+
+## Running Locally
+
+```bash
+# Set JWT secret
+export JWT_SECRET=dGVzdFNlY3JldEtleUZvclRlc3RpbmdQdXJwb3Nlc09ubHkxMjM=
+
+# Create database
+CREATE DATABASE taxrefund_db;
+
+# Run application
+mvn spring-boot:run
+```
+
+Runs on `http://localhost:8080`
+
+---
+
+## Running Tests
+
+```bash
+mvn test
+```
+
+Tests cover: eligibility validation, VAT calculation,
+status machine transitions, audit logging, JWT authorization.
+H2 in-memory database — no local PostgreSQL needed for tests.
+
+---
+
+## CI
+
+GitHub Actions runs compile + test + package on every push.
+PostgreSQL 15 service container. Java 17 temurin. Green on main.
